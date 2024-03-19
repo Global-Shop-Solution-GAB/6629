@@ -1,0 +1,231 @@
+﻿Program.Sub.ScreenSU.Start
+Gui.frmPartPrice..Create(BaseForm)
+Gui.frmPartPrice..Caption("Contract Part Pricing")
+Gui.frmPartPrice..Size(11265,6900)
+Gui.frmPartPrice..MinX(0)
+Gui.frmPartPrice..MinY(0)
+Gui.frmPartPrice..Position(0,0)
+Gui.frmPartPrice..AlwaysOnTop(False)
+Gui.frmPartPrice..FontName("Tahoma")
+Gui.frmPartPrice..FontSize(8.25)
+Gui.frmPartPrice..ControlBox(True)
+Gui.frmPartPrice..MaxButton(True)
+Gui.frmPartPrice..MinButton(True)
+Gui.frmPartPrice..MousePointer(0)
+Gui.frmPartPrice..Moveable(True)
+Gui.frmPartPrice..Sizeable(True)
+Gui.frmPartPrice..ShowInTaskBar(True)
+Gui.frmPartPrice..TitleBar(True)
+Gui.frmPartPrice..Event(UnLoad,frmPartPrice_UnLoad)
+Gui.frmPartPrice.frameInfo.Create(Frame)
+Gui.frmPartPrice.frameInfo.Enabled(True)
+Gui.frmPartPrice.frameInfo.Visible(True)
+Gui.frmPartPrice.frameInfo.Zorder(0)
+Gui.frmPartPrice.frameInfo.Size(10320,1035)
+Gui.frmPartPrice.frameInfo.Position(360,270)
+Gui.frmPartPrice.frameInfo.Caption("")
+Gui.frmPartPrice.frameInfo.FontName("Tahoma")
+Gui.frmPartPrice.frameInfo.FontSize(8.25)
+Gui.frmPartPrice.frameInfo.Anchor(15)
+Gui.frmPartPrice.txtPart.Create(TextBox,"",True,2805,300,0,15,480,True,0,"Tahoma",8.25,,1)
+Gui.frmPartPrice.txtPart.Parent("frameInfo")
+Gui.frmPartPrice.lblPart.Create(Label,"Part",True,300,195,0,15,165,True,0,"Tahoma",8.25,,0,0)
+Gui.frmPartPrice.lblPart.BorderStyle(0)
+Gui.frmPartPrice.lblPart.Parent("frameInfo")
+Gui.frmPartPrice.txtRev.Create(TextBox,"",True,765,300,0,3120,480,True,0,"Tahoma",8.25,,1)
+Gui.frmPartPrice.txtRev.Parent("frameInfo")
+Gui.frmPartPrice.lblRev.Create(Label,"Rev",True,285,195,0,3120,165,True,0,"Tahoma",8.25,,0,0)
+Gui.frmPartPrice.lblRev.BorderStyle(0)
+Gui.frmPartPrice.lblRev.Parent("frameInfo")
+Gui.frmPartPrice.lblLoc.Create(Label,"Loc",True,240,195,0,4170,165,True,0,"Tahoma",8.25,,0,0)
+Gui.frmPartPrice.lblLoc.BorderStyle(0)
+Gui.frmPartPrice.lblLoc.Parent("frameInfo")
+Gui.frmPartPrice.txtLoc.Create(TextBox,"",True,480,300,0,4170,480,True,0,"Tahoma",8.25,,1)
+Gui.frmPartPrice.txtLoc.Parent("frameInfo")
+Gui.frmPartPrice.lblDesc.Create(Label,"Part Description",True,1140,195,0,4980,165,True,0,"Tahoma",8.25,,0,0)
+Gui.frmPartPrice.lblDesc.BorderStyle(0)
+Gui.frmPartPrice.lblDesc.Parent("frameInfo")
+Gui.frmPartPrice.txtDesc.Create(TextBox,"",True,5145,300,0,4980,480,True,0,"Tahoma",8.25,,1)
+Gui.frmPartPrice.txtDesc.Parent("frameInfo")
+Gui.frmPartPrice.GsGCPartPrice.Create(GsGridControl)
+Gui.frmPartPrice.GsGCPartPrice.Enabled(True)
+Gui.frmPartPrice.GsGCPartPrice.Visible(True)
+Gui.frmPartPrice.GsGCPartPrice.Zorder(0)
+Gui.frmPartPrice.GsGCPartPrice.Size(10320,4455)
+Gui.frmPartPrice.GsGCPartPrice.Position(360,1590)
+Gui.frmPartPrice.GsGCPartPrice.Anchor(15)
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+V.Global.bConOpen.Declare(Boolean, False)
+Program.Sub.Preflight.End
+Program.Sub.Main.Start
+'Brandon Medina
+'Customer: Secon Rubber and Plastics
+'Quote: 13363-0
+'Desc: Add grid from Inventory > File > K Part Price to the New Supply and Demand Screen Script 1 button 
+F.Intrinsic.Control.Try
+	F.Intrinsic.Control.SelectCase(V.Caller.Hook)
+		'New Supply and Demand Entry Hook 
+		F.Intrinsic.Control.Case(52000)
+			F.Intrinsic.Control.CallSub(renameScriptButton)
+		'Script 1 button
+		F.Intrinsic.Control.Case(52050)
+			F.Intrinsic.Control.CallSub(populateScreen)
+			Gui.frmPartPrice..Show
+	F.Intrinsic.Control.EndSelect
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(ErrorMsg, CurrentSub, V.Ambient.CurrentSubroutine)
+F.Intrinsic.Control.EndTry
+Program.Sub.Main.End
+
+Program.Sub.ErrorMsg.Start
+V.Local.sError.Declare
+
+F.Intrinsic.Control.If(V.Global.bConOpen)
+	F.ODBC.Connection!con.Close
+F.Intrinsic.Control.EndIf	
+
+'Generic Error message.
+f.Intrinsic.String.Build("Project GCG_6629_Contract_Pricing_View.g2u {0}{0}Subroutine: {1}{0}Error: {2} with Description: {3}", v.Ambient.NewLine, v.Args.CurrentSub, v.Ambient.ErrorNumber, v.Ambient.ErrorDescription, v.Local.sError)
+f.Intrinsic.UI.Msgbox(v.Local.sError)
+Program.Sub.ErrorMsg.End
+
+Program.Sub.frmPartPrice_UnLoad.Start
+F.Intrinsic.Control.End
+Program.Sub.frmPartPrice_UnLoad.End
+
+Program.Sub.renameScriptButton.Start
+F.Intrinsic.Control.Try
+	V.Local.sRowContent.Declare
+	V.Local.iRowCount.Declare
+	V.Local.i.Declare
+	
+	F.Intrinsic.BDF.Load("ScriptCaps", "SupplyAndDemand-AccordionControlNavigation-bdf")
+	F.Intrinsic.BDF.Clone("ScriptCaps", "CaptionsCopy")
+	'Replace row index 24 caption value (column index 1)
+	F.Intrinsic.BDF.ReadRowCount("ScriptCaps", V.Local.iRowCount)
+	V.Local.iRowCount.Set(V.Local.iRowCount.--)
+	
+	F.Intrinsic.Control.For(V.Local.i, 0, V.Local.iRowCount, 1)
+		F.Intrinsic.BDF.ReadRow("ScriptCaps", V.Local.i, V.Local.sRowContent)
+		F.Intrinsic.Control.If(V.Local.i, <>, 24)
+			F.Intrinsic.BDF.WriteRow("CaptionsCopy", V.Local.sRowContent)
+		F.Intrinsic.Control.Else
+			F.Intrinsic.String.Split(V.Local.sRowContent, "|~|", V.Local.sRowContent)
+			V.Local.sRowContent(1).Set("Contract Part Price")
+			F.Intrinsic.String.Join(V.Local.sRowContent, "|~|", V.Local.sRowContent)
+			F.Intrinsic.BDF.WriteRow("CaptionsCopy", V.Local.sRowContent)
+		F.Intrinsic.Control.EndIf
+	F.Intrinsic.Control.Next(V.Local.i)
+	
+	F.Intrinsic.BDF.Save("CaptionsCopy", "SupplyAndDemand-AccordionControlNavigation-bdf")
+	
+F.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(ErrorMsg, CurrentSub, V.Ambient.CurrentSubroutine)
+F.Intrinsic.Control.EndTry
+Program.Sub.renameScriptButton.End
+Program.Sub.populateScreen.Start
+F.Intrinsic.Control.Try
+	V.Local.sPart.Declare
+	V.Local.sRev.Declare
+	V.Local.sPartRev.Declare
+	V.Local.sLoc.Declare
+	V.Local.sDesc.Declare
+	V.Local.sSQL.Declare
+	V.Local.i.Declare
+	V.Local.iColumnNameIndex.Declare
+	V.Local.iCustomerIndex.Declare
+	
+	V.Local.sPart.Set(V.Passed.PartNumber.Trim)
+	V.Local.sRev.Set(V.Passed.PartNumberRevision.Trim)
+	V.Local.sLoc.Set(V.Passed.LocationCode.Trim)
+	V.Local.sDesc.Set(V.Passed.SupplyAndDemand-TextEditDescription.Trim)
+	
+	Gui.frmPartPrice.txtPart.Text(V.Local.sPart)
+	Gui.frmPartPrice.txtRev.Text(V.Local.sRev)
+	Gui.frmPartPrice.txtLoc.Text(V.Local.sLoc)
+	Gui.frmPartPrice.txtDesc.Text(V.Local.sDesc)
+	
+	F.Intrinsic.String.GSSPartString(V.Local.sPart, V.Local.sRev, V.Local.sPartRev)
+	
+	'Account for fixed pricing and qty price break 
+	'F.Intrinsic.String.Build("select CUSTOMER, IF(DATE_EFFECTIVE = '1900-01-01', '', DATE_EFFECTIVE) as DATE_EFFECTIVE, QB_QTY_1, QB_QTY_2, QB_QTY_3, QB_QTY_4, QB_QTY_5, QB_QTY_6, QB_QTY_7, QB_QTY_8, QB_QTY_9, QB_QTY_10, QB_PRICE_1, QB_PRICE_2, QB_PRICE_3, QB_PRICE_4, QB_PRICE_5, QB_PRICE_6, QB_PRICE_7, QB_PRICE_8, QB_PRICE_9, QB_PRICE_10 from V_OE_C_PART_PRICE where PART = '{0}'", V.Local.sPartRev.PSQLFriendly, V.Local.sSQL)
+	'F.Intrinsic.String.Build("select CUSTOMER, IF(DATE_EFFECTIVE = '1900-01-01', '', DATE_EFFECTIVE) as DATE_EFFECTIVE, PRICING_METHOD, FF_PRICE, QB_QTY_1, QB_QTY_2, QB_QTY_3, QB_QTY_4, QB_QTY_5, QB_QTY_6, QB_QTY_7, QB_QTY_8, QB_QTY_9, QB_QTY_10, QB_PRICE_1, QB_PRICE_2, QB_PRICE_3, QB_PRICE_4, QB_PRICE_5, QB_PRICE_6, QB_PRICE_7, QB_PRICE_8, QB_PRICE_9, QB_PRICE_10 from V_OE_C_PART_PRICE where PART = '{0}'", V.Local.sPartRev.PSQLFriendly, V.Local.sSQL)
+		'Add in customer name
+	F.Intrinsic.String.Build("select A.CUSTOMER, IF(A.DATE_EFFECTIVE = '1900-01-01', '', A.DATE_EFFECTIVE) as DATE_EFFECTIVE, B.NAME_CUSTOMER, A.PRICING_METHOD, A.FF_PRICE, A.QB_QTY_1, A.QB_QTY_2, A.QB_QTY_3, A.QB_QTY_4, A.QB_QTY_5, A.QB_QTY_6, A.QB_QTY_7, A.QB_QTY_8, A.QB_QTY_9, A.QB_QTY_10, A.QB_PRICE_1, A.QB_PRICE_2, A.QB_PRICE_3, A.QB_PRICE_4, A.QB_PRICE_5, A.QB_PRICE_6, A.QB_PRICE_7, A.QB_PRICE_8, A.QB_PRICE_9, A.QB_PRICE_10 from V_OE_C_PART_PRICE A left join V_CUSTOMER_MASTER B on A.CUSTOMER = B.CUSTOMER where A.PART = '{0}'", V.Local.sPartRev.PSQLFriendly, V.Local.sSQL)
+	F.ODBC.Connection!con.OpenCompanyConnection
+	V.Global.bConOpen.Set(True)
+	F.Data.DataTable.CreateFromSQL("dtPartPriceSource", "con", V.Local.sSQL)
+	F.ODBC.Connection!con.Close
+	V.Global.bConOpen.Set(False)
+	
+	'Only need 1 qty column, and 1 price 
+	'F.Data.DataTable.CreateFromString("dtPartPrice", "", "CUSTOMER*!*DATE_EFFECTIVE*!*QTY*!*PRICE", "String*!*String*!*String*!*String", , , True)
+	F.Data.DataTable.CreateFromString("dtPartPrice", "", "CUSTOMER*!*NAME_CUSTOMER*!*DATE_EFFECTIVE*!*QTY*!*PRICE", "String*!*String*!*String*!*String*!*String", , , True)
+	F.Data.DataTable.DeleteRow("dtPartPrice", 0)
+
+	'Need to have error handling for case where no data exists
+	F.Intrinsic.Control.If(V.DataTable.dtPartPriceSource.RowCount, <>, 0)
+		'Loop through the customers, and within each customer, through all 10 possible prices if pricing method is Qty break, otherwise just take FF_Price field 
+		F.Intrinsic.Control.For(V.Local.iCustomerIndex, 0, V.DataTable.dtPartPriceSource.RowCount--, 1)
+			F.Intrinsic.Control.If(V.DataTable.dtPartPriceSource(V.Local.iCustomerIndex).PRICING_METHOD!FieldValTrim, =, "FF")
+				'F.Data.DataTable.AddRow("dtPartPrice", "CUSTOMER", V.DataTable.dtPartPriceSource(V.Local.iCustomerIndex).CUSTOMER!FieldVal, "DATE_EFFECTIVE", V.DataTable.dtPartPriceSource(V.Local.iCustomerIndex).DATE_EFFECTIVE!FieldVal, "QTY", "Fixed", "PRICE", V.DataTable.dtPartPriceSource(V.Local.iCustomerIndex).FF_PRICE!FieldVal)
+				'Add Customer name column
+				F.Data.DataTable.AddRow("dtPartPrice", "CUSTOMER", V.DataTable.dtPartPriceSource(V.Local.iCustomerIndex).CUSTOMER!FieldVal, "NAME_CUSTOMER", V.DataTable.dtPartPriceSource(V.Local.iCustomerIndex).NAME_CUSTOMER!FieldVal, "DATE_EFFECTIVE", V.DataTable.dtPartPriceSource(V.Local.iCustomerIndex).DATE_EFFECTIVE!FieldVal, "QTY", "Fixed", "PRICE", V.DataTable.dtPartPriceSource(V.Local.iCustomerIndex).FF_PRICE!FieldVal)
+			F.Intrinsic.Control.Else
+				F.Intrinsic.Control.For(V.Local.iColumnNameIndex, 1, 10, 1)
+					'V.Local.iColumnNameIndex.Set(V.Local.i.++)
+					F.Data.DataTable.AddRow("dtPartPrice", "CUSTOMER", V.DataTable.dtPartPriceSource(V.Local.iCustomerIndex).CUSTOMER!FieldVal, "NAME_CUSTOMER", V.DataTable.dtPartPriceSource(V.Local.iCustomerIndex).NAME_CUSTOMER!FieldVal, "DATE_EFFECTIVE", V.DataTable.dtPartPriceSource(V.Local.iCustomerIndex).DATE_EFFECTIVE!FieldVal, "QTY", V.DataTable.dtPartPriceSource(V.Local.iCustomerIndex).QB_QTY_[V.Local.iColumnNameIndex]!FieldVal, "PRICE", V.DataTable.dtPartPriceSource(V.Local.iCustomerIndex).QB_PRICE_[V.Local.iColumnNameIndex]!FieldVal)
+				F.Intrinsic.Control.Next(V.Local.iColumnNameIndex)
+			F.Intrinsic.Control.EndIf
+		F.Intrinsic.Control.Next(V.Local.iCustomerIndex)
+	F.Intrinsic.Control.EndIf
+	
+	'Filter out empty qty breakdowns
+	F.Data.DataView.Create("dtPartPrice", "dvPartPrice", 22, "QTY <> '0.0000'", )
+	
+	F.Intrinsic.Control.CallSub(loadgvPartPrice)
+	
+F.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(ErrorMsg, CurrentSub, V.Ambient.CurrentSubroutine)
+F.Intrinsic.Control.EndTry
+Program.Sub.populateScreen.End
+
+Program.Sub.loadgvPartPrice.Start
+F.Intrinsic.Control.Try
+	
+	Gui.frmPartPrice.GsGCPartPrice.SuspendLayout()
+	Gui.frmPartPrice.GsGCPartPrice.AddGridviewFromDataview("gvPartPrice", "dtPartPrice", "dvPartPrice")
+	Gui.frmPartPrice.GsGCPartPrice.SetGridviewProperty("gvPartPrice", "AllowSort", True)
+	Gui.frmPartPrice.GsGCPartPrice.SetGridviewProperty("gvPartPrice", "AllowFilter", True)
+	Gui.frmPartPrice.GsGCPartPrice.SetGridviewProperty("gvPartPrice", "Showgrouppanel", True)
+	
+	Gui.frmPartPrice.GsGCPartPrice.SetColumnProperty("gvPartPrice", "CUSTOMER", "Caption", "Customer")
+	'Add
+	Gui.frmPartPrice.GsGCPartPrice.SetColumnProperty("gvPartPrice", "NAME_CUSTOMER", "Caption", "Custome Name")
+	Gui.frmPartPrice.GsGCPartPrice.SetColumnProperty("gvPartPrice", "DATE_EFFECTIVE", "Caption", "Effective Date")
+	Gui.frmPartPrice.GsGCPartPrice.SetColumnProperty("gvPartPrice", "QTY", "Caption", "Quantity")
+	Gui.frmPartPrice.GsGCPartPrice.SetColumnProperty("gvPartPrice", "PRICE", "Caption", "Price")
+	
+	Gui.frmPartPrice.GsGCPartPrice.SetColumnProperty("gvPartPrice", "CUSTOMER", "HeaderFontBold", "True")
+	'Add
+	Gui.frmPartPrice.GsGCPartPrice.SetColumnProperty("gvPartPrice", "NAME_CUSTOMER", "HeaderFontBold", "True")
+	Gui.frmPartPrice.GsGCPartPrice.SetColumnProperty("gvPartPrice", "DATE_EFFECTIVE", "HeaderFontBold", "True")
+	Gui.frmPartPrice.GsGCPartPrice.SetColumnProperty("gvPartPrice", "QTY", "HeaderFontBold", "True")
+	Gui.frmPartPrice.GsGCPartPrice.SetColumnProperty("gvPartPrice", "PRICE", "HeaderFontBold", "True")
+	
+	Gui.frmPartPrice.GsGCPartPrice.ResumeLayout()
+	Gui.frmPartPrice.GsGCPartPrice.MainView("gvPartPrice")
+	
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(ErrorMsg, CurrentSub, V.Ambient.CurrentSubroutine)
+F.Intrinsic.Control.EndTry
+Program.Sub.loadgvPartPrice.End
+
+Program.Sub.Comments.Start
+${$5$}$20.1.8286.22461$}$1
+${$6$}$bmedina$}$20221121153614184$}$kOipCrsyLBVj2KoSwkcdK23ChxGVcBlEY0fsvcB8J0QaOlh4U4yNdRKQABxQo7u47QwTUd45cqA=
+Program.Sub.Comments.End
